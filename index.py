@@ -28,9 +28,17 @@ class stockmarket:
     value = 0
     ticks = ""
     for item in self.xjson.keys():
-      value =  (int(float(self.xjson[item]['last']) * float(100000000)))
-      ticks = item
-      returnparse.append([ticks, value])
+      print(item)
+      if ("last" in self.xjson[item].keys()):
+        # Havelock
+        value =  float(self.xjson[item]['last'])
+        ticks = item
+        returnparse.append([ticks, value])
+      elif ("last_price" in self.xjson[item].keys()):
+        # Crypto Stocks
+        value = float(self.xjson[item]['last_price'])
+        ticks = item
+        returnparse.append([ticks, value])
     return returnparse
   
   def buildsecuritylist(self):
@@ -46,9 +54,31 @@ class stockmarket:
       else:
         # Item has not been created
         self.mysecurities[item] = {}
+        # Add Currency Code to those with no Currency Code (e.g. Havelock)
+        if "currency" not in unparsedlong[item].keys():
+          # Assume non defined are Bitcoin
+          self.mysecurities[item]["currency"] = "BTC"
+        # Run through Items
         for individualitems in unparsedlong[item].keys():
-          if (individualitems in [ "name", "symbol", "units" ]):
-            self.mysecurities[item][individualitems] = unparsedlong[item][individualitems]
+          if (individualitems in [ "name", "symbol", "units", "currency", "ticker", "number_public_shares" ]):
+            # Only grab the info that I want
+            '''
+              Mappings for Various Markest (This is where the Magic is :(
+              Us        Havelock      CryptoStocks
+              name      "name"        "name"
+              symbol    "symbol"      "ticker"
+              units     "units"       "number_public_shares"
+              currency   BTC(H)       "currency"  
+            '''
+            # Do Bindings
+            if (individualitems == "ticker"):
+              # Bind Ticker to Symbol
+              self.mysecurities[item]["ticker"] = unparsedlong[item][individualitems]
+            elif (individualitems == "number_public_shares"):
+              # Bind number_public_shares to units
+              self.mysecurities[item]["units"] = unparsedlong[item][individualitems]
+            else:
+              self.mysecurities[item][individualitems] = unparsedlong[item][individualitems]
             
   def updatestockmarket(self):
     self.xjson = self.makeapicall()
