@@ -31,7 +31,12 @@ class stockmarket:
       print(item)
       if ("last" in self.xjson[item].keys()):
         # Havelock
-        value =  float(self.xjson[item]['last'])
+        if (self.xjson[item]['last'] == ""):
+          # Nothing Returned
+          value = 0
+        else:
+          # Something Returned
+          value =  float(self.xjson[item]['last'])
         ticks = item
         returnparse.append([ticks, value])
       elif ("last_price" in self.xjson[item].keys()):
@@ -80,19 +85,72 @@ class stockmarket:
             else:
               self.mysecurities[item][individualitems] = unparsedlong[item][individualitems]
             
-  def updatestockmarket(self):
+  def updatestockmarketprices(self):
     self.xjson = self.makeapicall()
-    self.stockprices = self.parsexjson()
-        
+    self.stockprices = self.priceparse()
+    
+  def updatestockmarket(self):
+    self.lxjson = self.makelongapicall()
+    self.marketparse()
+    
+  def marketparse(self):
+    infomappings = { 
+                "TICKER" : ["name"],
+                "FULLNAME" : ["symbol", "ticker"],
+                "CURRENCY" : ["currency"],
+                "TOTALMARKET" : ["units"],
+                }
+    
+    
+    unparsedlong = self.makelongapicall()
+    for item in unparsedlong.keys():
+      # Grab TICKER for each security
+      # Initialize a dict for each security
+      self.mysecurities[item] = {}
+      for endpoint in self.apilong[item]:
+        # Cycle through all the endpoints in each security
+        # Cycle through all the mappings
+        for mapping in infomappings.keys():
+          # if the endpoint is in the mapping you should totally map that shit
+          if endpoint in infomappings[mapping]:
+            # Place the mapping
+            self.mysecurities[item][mapping] = unparsedlong[item][endpoint]
+            
+            
+  def priceparse(self):
+    pricemappings = {
+                 "PRICE" : ["last", "last_price"],
+                }
+    returnparse = []
+    value = 0
+    ticks = ""
+    # Cycle through securities by Ticker
+    for item in self.xjson.keys():
+      # set ticker to item
+      ticks = item
+      # Cycle through securities' enpoints items name
+      for endpoint in self.xjson[item]:
+        # if the endpoint are in our mapping it's the price
+        if endpoint in pricemappings["PRICE"]:
+          # if the price isn't ""
+          if self.xjson[item][endpoint] == "" :
+            # NO DATA
+            value = 0
+          else:
+            # If the price isn't do the conversion
+            # Value Convert to float and store
+            value = float(self.xjson[item][endpoint])
+      # Now that you've found the ticker and he value add it to the price thing
+      returnparse.append([ticks, value])
+    return returnparse
+    
   def __init__(self, api, gapilong):
     # API String to acquire all the tickers
     self.api = api 
+    self.apilong = gapilong
     # Item to hold all the stock information
     self.xjson = self.makeapicall()
-    # API String for full market data
-    self.apilong = gapilong
-    self.stockprices = self.parsexjson()
-    self.buildsecuritylist()
+    self.lxjson = self.makelongapicall()
     self.active = True;
     
 
