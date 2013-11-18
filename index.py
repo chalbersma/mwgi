@@ -8,7 +8,8 @@ import csv
 import sys
 
 class stockmarket:
-
+  
+  mysecurities = {}
     
   def makeapicall(self):
     request = urllib.request.Request(self.api, headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:24.0) Gecko/20100101 Firefox/24.0'})
@@ -38,3 +39,13 @@ class stockmarket:
     # Item to hold all the stock information
     self.xjson = self.makeapicall()
     self.stockprices = self.parsexjson()
+    self.active = True;
+    
+  def buildsecuritylist(self, parsedprice):
+    for item in parsedprice:
+      if item[0] in self.mysecurities :
+        # Security Exists In List
+        self.mysecurities[item[0]] = item[1]
+      else:
+        # Security Does not exist
+        self.mysecurities.update({item[0]: item[1]})
