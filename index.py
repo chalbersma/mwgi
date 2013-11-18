@@ -12,40 +12,57 @@ class stockmarket:
   mysecurities = {}
     
   def makeapicall(self):
-    request = urllib.request.Request(self.api, headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:24.0) Gecko/20100101 Firefox/24.0'})
+    request = urllib.request.Request(self.api, headers = {'user-agent': 'MWGI V2'})
     response = urllib.request.urlopen(request);
     apicalljson = json.loads((response.read().decode('utf-8')))
-    print (apicalljson.items())
-    print (apicalljson.keys())
-    print (apicalljson['NEOBEE'])
+    return apicalljson
+  
+  def makelongapicall(self):
+    request = urllib.request.Request(self.apilong, headers = {'user-agent': 'MWGI V2'})
+    response = urllib.request.urlopen(request);
+    apicalljson = json.loads((response.read().decode('utf-8')))
     return apicalljson
   
   def parsexjson(self):
-    print (self.xjson)
     returnparse = []
     value = 0
     ticks = ""
-    print (self.xjson['NEOBEE'])
     for item in self.xjson.keys():
-      print ()
       value =  (int(float(self.xjson[item]['last']) * float(100000000)))
       ticks = item
       returnparse.append([ticks, value])
     return returnparse
   
-  def __init__(self, api):
+  def buildsecuritylist(self):
+    #
+    #{security : { "item1" : item , "item2" : item}
+    #
+    unparsedlong = self.makelongapicall()
+    for item in unparsedlong.keys():
+      if (item in self.mysecurities.keys()):
+        # Security has already been placed in list 
+        # No need to do anything
+        continue
+      else:
+        # Item has not been created
+        self.mysecurities[item] = {}
+        for individualitems in unparsedlong[item].keys():
+          if (individualitems in [ "name", "symbol", "units" ]):
+            self.mysecurities[item][individualitems] = unparsedlong[item][individualitems]
+            
+  def updatestockmarket(self):
+    self.xjson = self.makeapicall()
+    self.stockprices = self.parsexjson()
+        
+  def __init__(self, api, gapilong):
     # API String to acquire all the tickers
     self.api = api 
     # Item to hold all the stock information
     self.xjson = self.makeapicall()
+    # API String for full market data
+    self.apilong = gapilong
     self.stockprices = self.parsexjson()
+    self.buildsecuritylist()
     self.active = True;
     
-  def buildsecuritylist(self, parsedprice):
-    for item in parsedprice:
-      if item[0] in self.mysecurities :
-        # Security Exists In List
-        self.mysecurities[item[0]] = item[1]
-      else:
-        # Security Does not exist
-        self.mysecurities.update({item[0]: item[1]})
+
