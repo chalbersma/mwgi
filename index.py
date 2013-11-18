@@ -40,19 +40,18 @@ class stockmarket:
                 }
     
     
-    unparsedlong = self.makelongapicall()
-    for item in unparsedlong.keys():
+    for item in self.lxjson.keys():
       # Grab TICKER for each security
       # Initialize a dict for each security
       self.mysecurities[item] = {}
-      for endpoint in self.apilong[item]:
+      for endpoint in self.lxjson[item].keys():
         # Cycle through all the endpoints in each security
         # Cycle through all the mappings
         for mapping in infomappings.keys():
           # if the endpoint is in the mapping you should totally map that shit
           if endpoint in infomappings[mapping]:
             # Place the mapping
-            self.mysecurities[item][mapping] = unparsedlong[item][endpoint]
+            self.mysecurities[item][mapping] = self.lxjson[item][endpoint]
             
             
   def priceparse(self):
