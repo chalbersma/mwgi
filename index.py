@@ -29,7 +29,7 @@ class stockmarket:
     
   def updatestockmarket(self):
     self.lxjson = self.makelongapicall()
-    self.marketparse()
+    self.mysecurities = self.marketparse()
     
   def marketparse(self):
     infomappings = { 
@@ -52,15 +52,17 @@ class stockmarket:
           if endpoint in infomappings[mapping]:
             # Place the mapping
             self.mysecurities[item][mapping] = self.lxjson[item][endpoint]
-            
+    return self.mysecurities
             
   def priceparse(self):
     pricemappings = {
                  "PRICE" : ["last", "last_price"],
+                 "CURRENCY" : ["currency"]
                 }
-    returnparse = []
+    returnparse = {}
     value = 0
     ticks = ""
+    currency = "BTC"
     # Cycle through securities by Ticker
     for item in self.xjson.keys():
       # set ticker to item
@@ -77,8 +79,11 @@ class stockmarket:
             # If the price isn't do the conversion
             # Value Convert to float and store
             value = float(self.xjson[item][endpoint])
+          # Currency by default is BTC. Check if this thing has a different currency. If it doesn't then don't do anything but if it does update.
+        if endpoint in pricemappings["CURRENCY"]:
+          currency = str(self.xjson[item][endpoint])
       # Now that you've found the ticker and he value add it to the price thing
-      returnparse.append([ticks, value])
+      returnparse[ticks] = [value, currency]
     return returnparse
     
   def __init__(self, api, gapilong):
