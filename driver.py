@@ -11,15 +11,15 @@ havelockinvestments = stockmarket("https://www.havelockinvestments.com/r/tickerf
 havelockinvestments.marketparse()
 havelockinvestments.updatestockmarketprices()
 
-print(havelockinvestments.mysecurities)
-print(havelockinvestments.stockprices)
+# print(havelockinvestments.mysecurities)
+# print(havelockinvestments.stockprices)
 
 cryptostocks = stockmarket("https://cryptostocks.com/api/get_securities_info.json", "https://cryptostocks.com/api/get_securities_info.json")
 cryptostocks.marketparse()
 cryptostocks.updatestockmarketprices()
 
-print (cryptostocks.mysecurities)
-print (cryptostocks.stockprices)
+# print (cryptostocks.mysecurities)
+# print (cryptostocks.stockprices)
 
 testindexdef = {
                 "CRYPTSY" : [cryptostocks],

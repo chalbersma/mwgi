@@ -51,7 +51,7 @@ class stockmarket:
           # if the endpoint is in the mapping you should totally map that shit
           if endpoint in infomappings[mapping]:
             # Place the mapping
-            self.mysecurities[item][mapping] = self.lxjson[item][endpoint]
+            self.mysecurities[item][mapping] = self.lxjson[item][endpoint].encode('utf-8').strip()
     return self.mysecurities
             
   def priceparse(self):
@@ -81,7 +81,7 @@ class stockmarket:
             value = float(self.xjson[item][endpoint])
           # Currency by default is BTC. Check if this thing has a different currency. If it doesn't then don't do anything but if it does update.
         if endpoint in pricemappings["CURRENCY"]:
-          currency = str(self.xjson[item][endpoint])
+          currency = self.xjson[item][endpoint].encode('utf-8').strip()
       # Now that you've found the ticker and he value add it to the price thing
       returnparse[ticks] = [value, currency]
     return returnparse
